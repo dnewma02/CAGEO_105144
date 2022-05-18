@@ -1,0 +1,37 @@
+\documentclass[12pt]{article}
+\pagestyle{empty}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\begin{document}
+	\begin{algorithm}
+		\caption{$z_{max}$ scale optimization}
+		\label{alg:zmax}
+		\begin{algorithmic}
+			\Require $DEM$, $g_{lower}$, $g_{upper}$, $g_{interval}$
+			\State Initialize $g_{raster}$, $v_{raster}$, and $z_{raster}$
+			\While{$g_{lower} \le g_{upper}$}
+			\State $g \gets g_{lower}$
+			\State Determine mean smoothing parameters
+			\For{$n=1, \dots, 6$}
+			\State Integral image of $n-1$ $DEM_{scaled}$
+			\State $DEM_{scaled} \gets$ Mean elevation from integral image
+			\EndFor
+			\ForAll{cells} in parallel
+			\State $w \gets$ neighbourhood of $DEM_{scaled}$ around cell
+			\State $v_{cell} \gets f(w)$ using LSP function $f$
+			\EndFor
+			\State Compute $\mu_g$ and $\sigma_g$
+			\ForAll{cells} in parallel
+			\State $z \gets z(v_{cell},\mu_g,\sigma_g)$
+			\If{$|z| > |z_{raster,cell}|$}
+			\State $g_{raster,cell} \gets g$
+			\State $v_{raster,cell} \gets v$
+			\State $z_{raster,cell} \gets z$
+			\EndIf
+			\EndFor
+			\State $g_{lower} = g_{lower} + g_{interval}$
+			\EndWhile
+			\State \Return $g_{raster}$, $v_{raster}$, and $z_{raster}$
+		\end{algorithmic}
+	\end{algorithm}
+\end{document}
